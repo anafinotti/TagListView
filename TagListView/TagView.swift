@@ -56,6 +56,19 @@ open class TagView: UIButton {
             updateRightInsets()
         }
     }
+    
+    @IBInspectable open var rightIconpaddingY: CGFloat = 8 {
+        didSet {
+            titleEdgeInsets.top = paddingY
+            titleEdgeInsets.bottom = paddingY
+        }
+    }
+    @IBInspectable open var rightIconpaddingX: CGFloat = 4 {
+        didSet {
+            titleEdgeInsets.left = paddingX
+            updateRightInsets()
+        }
+    }
 
     @IBInspectable open var tagBackgroundColor: UIColor = UIColor.gray {
         didSet {
@@ -119,6 +132,35 @@ open class TagView: UIButton {
         }
     }
     
+    //MARK: Right Icon
+    
+    let rightIcon = RightIconImage()
+    
+    @IBInspectable open var enableRightIcon: Bool = false {
+        didSet {
+            rightIcon.isHidden = !enableRightIcon
+            updateRightInsets()
+        }
+    }
+    
+    @IBInspectable open var rightIconImage: UIImage? {
+        didSet {
+            setRightIconImage()
+        }
+    }
+    
+    @IBInspectable open var rightIconSize: CGFloat = 16 {
+        didSet {
+            rightIcon.iconSize = rightIconSize
+            updateRightInsets()
+        }
+    }
+    
+    func setRightIconImage() {
+        
+        self.rightIcon.image = rightIconImage
+    }
+
     // MARK: remove button
     
     let removeButton = CloseButton()
@@ -171,7 +213,10 @@ open class TagView: UIButton {
         titleLabel?.lineBreakMode = titleLineBreakMode
 
         frame.size = intrinsicContentSize
+        
+        addSubview(rightIcon)
         addSubview(removeButton)
+        
         removeButton.tagView = self
         
         let longPress = UILongPressGestureRecognizer(target: self, action: #selector(self.longPress))
@@ -194,27 +239,84 @@ open class TagView: UIButton {
         if enableRemoveButton {
             size.width += removeButtonIconSize + paddingX
         }
+        
+        if enableRightIcon {
+            
+            size.width += rightIconSize + paddingX
+        }
         return size
     }
     
     private func updateRightInsets() {
+        
+        if enableRightIcon {
+            
+            titleEdgeInsets.left = paddingX + rightIconSize
+        }
+        
         if enableRemoveButton {
+            
             titleEdgeInsets.right = paddingX  + removeButtonIconSize + paddingX
         }
-        else {
-            titleEdgeInsets.right = paddingX
-        }
+        
+        if !enableRightIcon && !enableRemoveButton { titleEdgeInsets.right = paddingX }
+        
     }
     
     open override func layoutSubviews() {
+        
         super.layoutSubviews()
+        
         if enableRemoveButton {
             removeButton.frame.size.width = paddingX + removeButtonIconSize + paddingX
             removeButton.frame.origin.x = self.frame.width - removeButton.frame.width
             removeButton.frame.size.height = self.frame.height
             removeButton.frame.origin.y = 0
         }
+        
+        if enableRightIcon {
+            
+            rightIcon.frame.size.width = rightIconSize
+            rightIcon.frame.origin.x = paddingX
+            rightIcon.frame.size.height = rightIconSize
+            rightIcon.frame.origin.y = rightIconpaddingY
+        }
     }
+}
+
+
+
+internal class RightIconImage: UIImageView {
+
+    var iconSize: CGFloat = 16
+    var lineWidth: CGFloat = 1
+    var lineColor: UIColor = UIColor.white.withAlphaComponent(0.54)
+
+    weak var tagView: TagView?
+
+    override func draw(_ rect: CGRect) {
+        let path = UIBezierPath()
+
+        path.lineWidth = lineWidth
+        path.lineCapStyle = .round
+
+        let iconFrame = CGRect(
+            x: 0,
+            y: 0,
+            width: iconSize,
+            height: iconSize
+        )
+
+        path.move(to: iconFrame.origin)
+        path.addLine(to: CGPoint(x: iconFrame.maxX, y: iconFrame.maxY))
+        path.move(to: CGPoint(x: iconFrame.maxX, y: iconFrame.minY))
+        path.addLine(to: CGPoint(x: iconFrame.minX, y: iconFrame.maxY))
+
+        lineColor.setStroke()
+
+        path.stroke()
+    }
+
 }
 
 /// Swift < 4.2 support
