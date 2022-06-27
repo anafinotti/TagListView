@@ -149,6 +149,12 @@ open class TagView: UIButton {
         }
     }
     
+    @IBInspectable open var rightIconColor: UIColor? {
+        didSet {
+            setRightIconColor()
+        }
+    }
+    
     @IBInspectable open var rightIconSize: CGFloat = 16 {
         didSet {
             rightIcon.iconSize = rightIconSize
@@ -159,6 +165,11 @@ open class TagView: UIButton {
     func setRightIconImage() {
         
         self.rightIcon.image = rightIconImage
+    }
+    
+    func setRightIconColor() {
+        
+        self.rightIcon.tintColor = self.rightIconColor
     }
 
     // MARK: remove button
@@ -291,7 +302,7 @@ internal class RightIconImage: UIImageView {
     var iconSize: CGFloat = 16
     var lineWidth: CGFloat = 1
     var lineColor: UIColor = UIColor.white.withAlphaComponent(0.54)
-
+    
     weak var tagView: TagView?
 
     override func draw(_ rect: CGRect) {
